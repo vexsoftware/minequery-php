@@ -36,9 +36,9 @@ class Minequery {
 	}
 	
 	public function player_list() {
-		$list = explode(' ', $this->query[3]);
+		$list = explode(' ', $this->query[3], 2);
 		$list = trim($list[1], '[]');
-		$list = explode(',', $list);
+		$list = explode(', ', $list);
 		return $list;
 	}
 }
