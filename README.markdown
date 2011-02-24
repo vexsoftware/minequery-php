@@ -1,20 +1,37 @@
 # Minequery PHP
 
-A PHP library for Minequery.
+A PHP class for Minequery.
 
 ## Usage
 
-`$minequery->player_list();`
-Returns an array containing each players name.
+### query
 
-`$minequery->player_count();`
-Returns the current number of players online.
+    Minequery::query($address, $port = 25566, $timeout = 30);
 
-`$minequery->max_players();`
-Returns the max number of players the server will accept.
+Queries a Minequery Server.
 
-`$minequery->port();`
-Returns the port the server is running on.
+**Parameters:**  
+`$address` - The address to the Minequery server.   
+`$port` - The port of the Minequery server.  
+`$timeout` - The time given before the connection attempt gives up.
 
-`$minequery->query;`
-Returns the raw response in an array.
+**Returns:**  
+An array on success, FALSE on failure.
+
+### query_json
+
+    Minequery::query_json($address, $port = 25566, $timeout = 30);
+
+Queries a Minequery Server using JSON.
+
+**Parameters:**  
+`$address` - The address to the Minequery server.  
+`$port` - The port of the Minequery server.  
+`$timeout` - The time given before the connection attempt gives up.
+
+**Returns:**  
+A stdClass object on success, FALSE on failure.
+
+## License
+
+Copyright (c) 2011 [Kramer Campbell](http://kramerc.com/), released under the GPL v3.

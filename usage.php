@@ -1,26 +1,22 @@
 <?php
-
-// turn on error reporting so we know if something is wrong
-error_reporting(E_ALL);
+/*
+ * Minequery PHP
+ * Copyright (C) 2011 Kramer Campbell
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 require('minequery.class.php');
-
-$status = new Minequery('localhost');
-
-echo "Server Port: ";
-echo $status->port();
-echo "<br />";
-
-echo "Max Players: ";
-echo $status->max_players();
-echo "<br />";
-
-echo "Currently Online: ";
-echo $status->player_count();
-echo "<br />";
-
-echo "<pre>";
-print_r($status->player_list());
-echo "</pre>";
-
-/* End of usage.php */
+print_r(Minequery::query("localhost"));
+print_r(Minequery::query_json("localhost"));

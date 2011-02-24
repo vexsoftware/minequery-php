@@ -1,87 +1,112 @@
 <?php
+/*
+ * Minequery PHP
+ * Copyright (C) 2011 Kramer Campbell
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
-* Query a Minecraft server running hMod with Minequery
-*/
+ * The Minequery PHP class.
+ */
+class Minequery {
+	/**
+	 * Queries a Minequery server.
+	 *
+	 * @static
+	 * @param string $address The address to the Minequery server.
+	 * @param int $port The port of the Minequery server.
+	 * @param int $timeout The time given before the connection attempt gives up.
+	 * @return array|bool An array on success, FALSE on failure.
+	 */
+	public static function query($address, $port = 25566, $timeout = 30) {
+		$query = array();
 
-// new line constant
-define("NL", "\n");
+		$beginning_time = microtime(true);
 
-class Minequery
-{
-	
-	// create the socket and establish a connection
-	// with the minecraft server
-	function __construct($server, $port = 25566)
-	{
-		$this->socket = fsockopen($server, $port, $erno, $erst, 5);
-		if ($this->socket == FALSE) {
-			// error out and die if we cant connect
-			trigger_error("Could not connect to the remote server", E_USER_ERROR);
-			die();
+		$socket = @fsockopen($address, $port, $errno, $errstr, $timeout);
+
+		if (!$socket) {
+			// Could not establish a connection to the server.
+			return false;
 		}
-		else {
-			$this->query();
-		}
+
+		$end_time = microtime(true);
+
+		fwrite($socket, "QUERY\n");
+
+		$response = "";
 		
-	}
-	
-	// send the request and store the result for later
-	// processing by the class
-	private function query()
-	{
-		$query = "QUERY" . NL ;
-		$buffer = "";
-		fwrite($this->socket, $query);
-		while (!feof($this->socket)) {
-			$buffer .= fgets($this->socket, 1024);
+		while(!feof($socket)) {
+			$response .= fgets($socket, 1024);
 		}
-		$this->query = explode(NL, $buffer);
-	}
-	
-	
-	// these functions split the line into 2 sections 
-	// and return the second section
-	
-	// SERVERPORT ####
-	public function port()
-	{
-		$port = explode(' ', $this->query[0]);
-		return $port[1];
-	}
-	
-	// PLAYERCOUNT ####
-	public function player_count()
-	{
-		$count = explode(' ', $this->query[1]);
-		return $count[1];
-	}
-	
-	// MAXPLAYERS ####
-	public function max_players()
-	{
-		$max = explode(' ', $this->query[2]);
-		return $max[1];
-	}
-	
-	
-	// this function splits the line into two sections
-	// then trims off the [ ] then explodes it by the 
-	// "," then we loop through the results and trim
-	// any whitespace that might be left
-	
-	// PLAYERLIST [ABCD,EFGH,etc]
-	public function player_list()
-	{
-		$list = explode(' ', $this->query[3], 2 );
-		$list = trim($list[1], '[]');
-		$list = explode(',', $list);
-		foreach ($list as $player) {
-			$player_list[] = trim($player);
-		}
-		return $player_list;
-	}
-	
-}
 
-/* End of file minequery.class.php */
+		$response = explode("\n", $response);
+
+		// Server port
+		$query['serverPort'] = explode(" ", $response[0], 2);
+		$query['serverPort'] = $query['serverPort'][1];
+
+		// Player count
+		$query['playerCount'] = explode(" ", $response[1], 2);
+		$query['playerCount'] = $query['playerCount'][1];
+
+		// Max players
+		$query['maxPlayers'] = explode(" ", $response[2], 2);
+		$query['maxPlayers'] = $query['maxPlayers'][1];
+
+		// Player list
+		$query['playerList'] = explode(" ", $response[3], 2);
+		$query['playerList'] = explode(", ", trim($query['playerList'][1], "[]"));
+
+		$query['latency'] = ($end_time - $beginning_time) * 1000;
+
+		return $query;
+	}
+
+	/**
+	 * Queries a Minequery server using JSON.
+	 *
+	 * @static
+	 * @param string $address The address to the Minequery server.
+	 * @param int $port The port of the Minequery server.
+	 * @param int $timeout The time given before the connection attempt gives up.
+	 * @return object|bool A stdClass object on success, FALSE on failure.
+	 */
+	public static function query_json($address, $port = 25566, $timeout = 30) {
+		$beginning_time = microtime(true);
+
+		$socket = @fsockopen($address, $port, $errno, $errstr, $timeout);
+
+		if (!$socket) {
+			// Could not establish a connection to the server.
+			return false;
+		}
+
+		$end_time = microtime(true);
+
+		fwrite($socket, "QUERY_JSON\n");
+
+		$response = "";
+
+		while(!feof($socket)) {
+			$response .= fgets($socket, 1024);
+		}
+
+		$query = json_decode($response);
+		$query->latency = ($end_time - $beginning_time) * 1000;
+
+		return $query;
+	}
+}
