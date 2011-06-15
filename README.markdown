@@ -34,4 +34,4 @@ A stdClass object on success, FALSE on failure.
 
 ## License
 
-Copyright (c) 2011 [Kramer Campbell](http://kramerc.com/), released under the GPL v3.
+Copyright (c) 2011 Vex Software LLC, released under the GPL v3.
