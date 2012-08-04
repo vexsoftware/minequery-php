@@ -22,6 +22,11 @@
  */
 class Minequery {
 	/**
+	 * @var string name of itself for testing
+	 */
+	public static $classname = 'Minequery';
+
+	/**
 	 * Queries a Minequery server.
 	 *
 	 * @static
@@ -33,23 +38,14 @@ class Minequery {
 	public static function query($address, $port = 25566, $timeout = 30) {
 		$query = array();
 
-		$beginning_time = microtime(true);
+		$write = "QUERY\n";
 
-		$socket = @fsockopen($address, $port, $errno, $errstr, $timeout);
+		$class = self::$classname;
 
-		if (!$socket) {
-			// Could not establish a connection to the server.
+		$response = $class::read($address, $port, $errno, $errstr, $timeout, $write, $latency);
+
+		if (false === $response) {
 			return false;
-		}
-
-		$end_time = microtime(true);
-
-		fwrite($socket, "QUERY\n");
-
-		$response = "";
-		
-		while(!feof($socket)) {
-			$response .= fgets($socket, 1024);
 		}
 
 		$response = explode("\n", $response);
@@ -67,10 +63,11 @@ class Minequery {
 		$query['maxPlayers'] = $query['maxPlayers'][1];
 
 		// Player list
-		$query['playerList'] = explode(" ", $response[3], 2);
-		$query['playerList'] = explode(", ", trim($query['playerList'][1], "[]"));
+		list(, $buffer) = explode(" ", $response[3], 2);
+		$buffer = trim($buffer, "[] ");
+		$query['playerList'] = $buffer ? explode(", ", $buffer) : array();
 
-		$query['latency'] = ($end_time - $beginning_time) * 1000;
+		$query['latency'] = $latency;
 
 		return $query;
 	}
@@ -100,7 +97,7 @@ class Minequery {
 
 		$response = "";
 
-		while(!feof($socket)) {
+		while (!feof($socket)) {
 			$response .= fgets($socket, 1024);
 		}
 
@@ -108,5 +105,45 @@ class Minequery {
 		$query->latency = ($end_time - $beginning_time) * 1000;
 
 		return $query;
+	}
+
+	/**
+	 * Queries a Remote Socket
+	 *
+	 * @static
+	 * @param string $address The address to the Minequery server.
+	 * @param int $port The port of the Minequery server.
+	 * @param int $errno
+	 * @param string $errstr
+	 * @param int $timeout The time given before the connection attempt gives up.
+	 * @param string $write
+	 * @param int $latency
+	 * @return string|bool An string on success, FALSE on failure.
+	 */
+	protected static function read($address, $port, &$errno, &$errstr, $timeout, $write, &$latency) {
+		$latency = NULL;
+
+		$beginning_time = microtime(true);
+
+		$socket = @fsockopen($address, $port, $errno, $errstr, $timeout);
+
+		if (!$socket) {
+			// Could not establish a connection to the server.
+			return false;
+		}
+
+		$end_time = microtime(true);
+
+		$latency = ($end_time - $beginning_time) * 1000;
+
+		fwrite($socket, $write);
+
+		$response = "";
+
+		while (!feof($socket)) {
+			$response .= fgets($socket, 1024);
+		}
+
+		return $response;
 	}
 }
