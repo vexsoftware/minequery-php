@@ -25,7 +25,7 @@ RESPONSE;
 
 Minequery::$classname = 'MinequeryStub';
 
-$query = Minequery::query($host, $port, 3);
+$query = Minequery::query($host);
 $playerList = $query['playerList'];
 $failure = array("");
 $fixed = array();

@@ -63,8 +63,9 @@ class Minequery {
 		$query['maxPlayers'] = $query['maxPlayers'][1];
 
 		// Player list
-		$query['playerList'] = explode(" ", $response[3], 2);
-		$query['playerList'] = explode(", ", trim($query['playerList'][1], "[]"));
+		list(, $buffer) = explode(" ", $response[3], 2);
+		$buffer = trim($buffer, "[] ");
+		$query['playerList'] = $buffer ? explode(", ", $buffer) : array();
 
 		$query['latency'] = $latency;
 
