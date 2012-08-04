@@ -32,16 +32,16 @@ Queries a Minequery Server using JSON.
 **Returns:**  
 A stdClass object on success, FALSE on failure.
 
+## Coding Standard
+
+Line Ending: UNIX  
+Indent: Tabs  
+Tab Size: 4  
+Brackets open at end of line for:  
+  * Functions
+  * Classes
+  * Class Functions
+
 ## License
 
 Copyright (c) 2011 Vex Software LLC, released under the GPL v3.
-
-## Coding Standard:
-
-Line Ending: UNIX
-Indent: Tabs
-Tab Size: 4
-Brackets open at end of line for:
-    - Functions
-    - Classes
-    - Class Functions
